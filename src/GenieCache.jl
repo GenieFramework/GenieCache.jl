@@ -10,7 +10,7 @@ export cachekey, withcache, @cache
 export purge, purgeall
 
 
-const CACHE_DURATION = Ref{Int}(0)
+const CACHE_DURATION = Ref{Int}(0) # seconds
 
 
 """
@@ -60,6 +60,45 @@ Removes all cached data.
 function purgeall end
 
 
+"""
+    fromcache(key::String, expiration::Int) :: Any
+
+Retrieves the cached data stored under the `key` key.
+"""
+function fromcache end
+
+"""
+    tocache(key::String, data::Any) :: Any
+
+Stores the `data` object under the `key` key.
+"""
+function tocache end
+
+
+"""
+    withcache(f::Function, key::Any, expiration::Int = GenieCache.cache_duration(); dir = "", condition::Bool = true)
+
+Executes the function `f` and stores the result into the cache for the duration (in seconds) of `expiration`. Next time the function is invoked,
+if the cache has not expired, the cached result is returned skipping the function execution.
+The optional `dir` param is used to designate the folder where the cache will be stored (within the configured cache folder).
+If `condition` is `false` caching will be skipped.
+"""
+function GenieCache.withcache(f::Function; key::Any = hash(f), expiration::Int = cache_duration(), condition::Bool = true, kwargs...)
+  ( expiration == 0 || ! condition ) && return f()
+
+  cached_data = fromcache(cachekey(string(key)), expiration, kwargs...)
+
+  if cached_data === nothing
+    output = f()
+    tocache(cachekey(string(key)), output, kwargs...)
+
+    return output
+  end
+
+  cached_data
+end
+
+
 macro cache(expr)
   quote
     withcache($(esc(string(expr)))) do
@@ -85,5 +124,11 @@ function cachekey(args...) :: String
 
   bytes2hex(SHA.sha1(String(take!(key))))
 end
+
+
+function __init__()
+  CACHE_DURATION[] = parse(Int, get(ENV, "GENIE_CACHE_DURATION", "0"))
+end
+
 
 end
