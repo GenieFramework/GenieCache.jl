@@ -11,7 +11,6 @@ export purge, purgeall
 
 
 const CACHE_DURATION = Ref{Int}(0)
-const CACHE_PATH = Ref{String}("cache")
 
 
 """
@@ -31,26 +30,6 @@ Sets the default duration of the cache in seconds.
 """
 function cache_duration!(duration::Int)
   CACHE_DURATION[] = duration
-end
-
-
-"""
-    cache_path()
-
-Returns the default path of the cache folder.
-"""
-function cache_path()
-  CACHE_PATH[]
-end
-
-
-"""
-    cache_path!(cachepath::AbstractString)
-
-Sets the default path of the cache folder.
-"""
-function cache_path!(cachepath::AbstractString)
-  CACHE_PATH[] = cachepath
 end
 
 
