@@ -86,7 +86,7 @@ If `condition` is `false` caching will be skipped.
 function GenieCache.withcache(f::Function; key::Any = hash(f), expiration::Int = cache_duration(), condition::Bool = true, kwargs...)
   ( expiration == 0 || ! condition ) && return f()
 
-  cached_data = fromcache(cachekey(string(key)), expiration, kwargs...)
+  cached_data = fromcache(cachekey(string(key)); expiration, kwargs...)
 
   if cached_data === nothing
     output = f()
