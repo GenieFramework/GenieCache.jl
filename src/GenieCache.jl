@@ -90,7 +90,7 @@ function GenieCache.withcache(f::Function; key::Any = hash(f), expiration::Int =
 
   if cached_data === nothing
     output = f()
-    tocache(cachekey(string(key)), output, kwargs...)
+    @async tocache(cachekey(string(key)), output, kwargs...) |> errormonitor
 
     return output
   end
